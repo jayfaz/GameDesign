@@ -3,54 +3,70 @@ using System.Collections;
 
 public class Playermovement : MonoBehaviour
 {
-    private float movementSpeed = 5.0f;
-    private bool isGrounded = true;
+	private float movementSpeed = 5.0f;
+	private bool isGrounded = true;
+    private bool hasDouble = true;
+	private float tempMoveSpeed;
+
+    public int jumpForce = 300;
 
 
-    void Update() 
+	void Update() 
 	{	
-        GetComponent<Rigidbody>().velocity = new Vector3(0, GetComponent<Rigidbody>().velocity.y, 0); //Set X and Z velocity to 0
+		GetComponent<Rigidbody>().velocity = new Vector3(0, GetComponent<Rigidbody>().velocity.y, 0); //Set X and Z velocity to 09
+		//Vector3 movement = (Input.GetAxis("Horizontal") * -Vector3.left * movementSpeed) + (Input.GetAxis("Vertical") * Vector3.forward * movementSpeed);
+		//movement *= Time.deltaTime;
+		float moveInputX = (Input.GetAxis("Horizontal") * Time.deltaTime * movementSpeed);
+		//float moveInputZ = (Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed);
+		transform.position += new Vector3(moveInputX, 0, 0); //last 0 is moveInputZ if needed
 
-        //Vector3 movement = (Input.GetAxis("Horizontal") * -Vector3.left * movementSpeed) + (Input.GetAxis("Vertical") * Vector3.forward * movementSpeed);
-        //movement *= Time.deltaTime;
-        float moveInputX = (Input.GetAxis("Horizontal") * Time.deltaTime * movementSpeed);
-        float moveInputZ = (Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed);
-        transform.position += new Vector3(moveInputX, 0, moveInputZ);
-  
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump"))
         {
-            //Jump(); //Manual jumping
-			GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-			GetComponent<Rigidbody>().AddForce(new Vector3(0, 400, 0), ForceMode.Force); 
-			isGrounded = false;
-            movementSpeed = 10;
+            if (isGrounded)
+            {
+                GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+                GetComponent<Rigidbody>().AddForce(new Vector3(0, jumpForce, 0), ForceMode.Force);
+                isGrounded = false;
+                movementSpeed = 10;
+                hasDouble = true;
+            }
+            else if (hasDouble)
+            {
+                GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+                GetComponent<Rigidbody>().AddForce(new Vector3(0, jumpForce, 0), ForceMode.Force);
+                isGrounded = false;
+                hasDouble = false;
+                movementSpeed = 10;
+            }
         }
 
-        while (Input.GetKeyDown(""))
-        {
-            movementSpeed = 20;
-        }
-        movementSpeed = 15;
+		while (Input.GetKeyDown(""))
+		{
+			tempMoveSpeed = movementSpeed;
+			movementSpeed = movementSpeed + 5;
+		}
+		movementSpeed = tempMoveSpeed;
 	}
 
-    void Jump()
-    {
-        if (!isGrounded) {return;}
-        isGrounded = false;
+	void Jump()
+	{
+		if (!isGrounded) {return;}
+		isGrounded = false;
 		GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-		GetComponent<Rigidbody>().AddForce(new Vector3(0, 700, 0), ForceMode.Force); 
-    }
+		GetComponent<Rigidbody>().AddForce(new Vector3(0, 300, 0), ForceMode.Force); 
+	}
 
 	void OnCollisionEnter(Collision other)
 	{
-        if (other.gameObject.tag == "platform")
-        {
-            isGrounded = true;
-            movementSpeed = 15;
-        }            
+		if (other.gameObject.tag == "platform")
+		{
+			isGrounded = true;
+            hasDouble = true;
+			movementSpeed = 15;
+		}            
 	}
 
-    /*void FixedUpdate()
+	/*void FixedUpdate()
     {
         isGrounded = Physics.Raycast(transform.position, - Vector3.up, 1.0f);
 
@@ -59,6 +75,6 @@ public class Playermovement : MonoBehaviour
             Jump(); //Automatic jumping
         }
     }*/
-       
+
 
 }
